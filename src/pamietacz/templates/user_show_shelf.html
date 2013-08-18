@@ -1,0 +1,25 @@
+{% extends "layout.html" %}
+{% block content %}
+{% load dict_get %}
+<p>Decks:</p>
+{% for deck in decks %}
+<div class="row">
+    <div class="span8">
+        <p>{% if deck.id in items_to_train_dict %}<a href="/user/deck/{{ deck.id }}/show/">{% endif %}
+        {{ deck.name }}
+        ({% if deck.id in items_to_train_dict %}{{ items_to_train_dict | dict_get:deck.id }} / {% endif %}{{ deck.card_set.count }})
+        {% if deck.id in items_to_train_dict %}</a>{% endif %}
+        </p>
+    </div>
+    <div class="span4">
+        {% if user.is_authenticated %}
+        <p>
+            {% if deck.id in started_train_sessions_decks_id %}<a href="/user/deck/{{ deck.id }}/train/">Continue session</a>
+            {% elif items_to_train_dict|dict_get:deck.id == 0 %}Nothing to train
+            {% else %}<a href="/user/deck/{{ deck.id }}/train/">Train</a> <a href="/user/deck/{{ deck.id }}/train/all/">Train all</a>
+            {% endif %}</p>
+        {% endif %}
+    </div>
+</div>
+{% endfor %}
+{% endblock %}

@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Pamiętacz</title>
+        <link rel="stylesheet" href="{{ STATIC_URL }}css/bootstrap.min.css">
+        <link rel="stylesheet" href="{{ STATIC_URL }}css/main.css">
+        <link rel="stylesheet" href="{{ STATIC_URL }}css/pygments.css">
+
+    </head>
+    <body>
+        <p><a href="/">Go home</a>
+        {% if not user.is_authenticated %}<a href="/register/">Register</a> <a href="/login/">Login</a>
+        {% else %}<a href="/logout/">Logout</a> Logged as {{ user.username }}
+        {% endif %}
+        <a href="/shelf/list/">List shelves</a>
+        </p>
+        <div class="container">
+            {% block content %}{% endblock %}
+        </div>
+
+        <script src="{{ STATIC_URL }}js/vendor/jquery-1.9.1.min.js"></script>
+        <script src="{{ STATIC_URL }}js/vendor/bootstrap.min.js"></script>
+        <script src="{{ STATIC_URL }}js/main.js"></script>
+    </body>
+</html>

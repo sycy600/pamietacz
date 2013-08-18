@@ -1,0 +1,22 @@
+{% extends "layout.html" %}
+{% block content %}
+{% load humanize %}
+<p><a href="/user/shelf/{{ deck.shelf.id }}/show/">Deck: {{ deck.name }}</a></p>
+{% for train_card in train_cards %}
+<div class="row">
+    <div class="span8">
+        <h3>Question:</h3>
+        {{ train_card.card.question_after_markdown | safe }}
+        <h3>Answer:</h3>
+        {{ train_card.card.answer_after_markdown | safe }}
+    </div>
+    <div class="span4">
+        {% if train_card.time_to_show <= datetime_now %}
+        now
+        {% else %}
+        {{ train_card.time_to_show | naturaltime }}
+        {% endif %}
+    </div>
+</div>
+{% endfor %}
+{% endblock %}

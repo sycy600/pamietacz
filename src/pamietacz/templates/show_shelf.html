@@ -1,0 +1,20 @@
+{% extends "layout.html" %}
+{% block content %}
+{% if user.is_authenticated %}
+<p><a href="/shelf/{{ shelf.id }}/deck/add/">Add a new deck</a></p>
+{% endif %}
+<p>Decks:</p>
+{% for deck in decks %}
+<div class="row">
+    <div class="span8">
+        <p><a href="/deck/{{ deck.id }}/show/">{{ deck.name }} ({{ deck.card_set.count }})</a></p>
+    </div>
+    <div class="span4">
+        {% if user.is_authenticated %}
+        <p><a href="/deck/{{ deck.id }}/edit/">Edit</a></p>
+        <p><a href="/deck/{{ deck.id }}/delete/" onclick="return confirm('Are you sure?');">Delete</a></p>
+        {% endif %}
+    </div>
+</div>
+{% endfor %}
+{% endblock %}

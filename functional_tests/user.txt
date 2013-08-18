@@ -1,0 +1,32 @@
+*** Settings ***
+
+Resource  resource.txt
+Test Setup  Open Browser  ${SERVER}  ${BROWSER}
+Test Teardown  Close Browser
+
+*** Variables ***
+
+${USERNAME}  John
+${PASSWORD}  some_password
+
+*** Test Cases ***
+
+Create New User
+    Location Should Be  ${SERVER}login/?next=/
+    Page Should Contain   Login
+    Page Should Contain   Register
+    Page Should Not Contain   Logout
+    Login User  ${USERNAME}  ${PASSWORD}
+    Page Should Contain  Please enter a correct username and password.
+    Page Should Contain   Login
+    Page Should Contain   Register
+    Page Should Not Contain   Logout
+    Register New User  ${USERNAME}  ${PASSWORD}
+    Login User  ${USERNAME}  ${PASSWORD}
+    Page Should Not Contain   Login
+    Page Should Not Contain   Register
+    Page Should Contain   Logout
+    Logout User
+    Page Should Contain   Login
+    Page Should Contain   Register
+    Page Should Not Contain   Logout

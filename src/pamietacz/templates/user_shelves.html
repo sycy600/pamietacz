@@ -1,0 +1,15 @@
+{% extends "layout.html" %}
+{% block content %}
+{% load dict_get %}
+My shelves
+{% for shelf in all_shelves %}
+<div class="row">
+    <div class="span8">
+        <p><a href="/user/shelf/{{ shelf.id }}/show/">{{ shelf.name }}</a> {{ items_to_train_dict | dict_get:shelf.id }} items to train</p>
+    </div>
+    <div class="span4">
+        <p><a href="/user/shelf/{{ shelf.id }}/stop/?next=/" onclick="return confirm('Are you sure?');">Stop</a></p>
+    </div>
+</div>
+{% endfor %}
+{% endblock %}

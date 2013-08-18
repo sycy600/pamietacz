@@ -1,0 +1,38 @@
+*** Settings ***
+
+Library  Selenium2Library
+
+*** Variables ***
+
+${SERVER}  http://localhost:${PORT}/
+${BROWSER}  firefox
+
+*** Keywords ***
+
+Register New User  [Arguments]  ${username}  ${password}
+    Click Link  Register
+    Wait Until Page Contains Element  username
+    Input Text  username  ${username}
+    Input Text  password1  ${password}
+    Input Text  password2  ${password}
+    Click Button  Submit
+    
+Login User   [Arguments]  ${username}  ${password}
+    Click Link  Login
+    Wait Until Page Contains Element  username
+    Input Text  username  ${username}
+    Input Text  password  ${password}
+    Click Button  Submit
+    
+Logout User
+    Click Link  Logout
+    
+Open Browser Then Register Then Login  [Arguments]  ${username}  ${password}
+    Open Browser  ${SERVER}  ${BROWSER}
+    Register New User  ${username}  ${password}
+    Login User  ${username}  ${password}
+    
+Logout Then Close Browser
+    Logout User
+    Wait Until Page Contains  Login
+    Close Browser

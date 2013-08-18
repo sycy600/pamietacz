@@ -1,0 +1,25 @@
+{% extends "layout.html" %}
+{% block content %}
+{% if user.is_authenticated %}
+<p><a href="/shelf/add/">Add a new shelf</a></p>
+{% endif %}
+<p>Shelves:</p>
+{% for shelf in all_shelves %}
+<div class="row">
+    <div class="span8">
+        <p><a href="/shelf/{{ shelf.id }}/show/">{{ shelf.name }}</a></p>
+    </div>
+    <div class="span4">
+        {% if user.is_authenticated %}
+            {% if shelf.id not in started_shelves_ids %}
+            <p><a href="/user/shelf/{{ shelf.id }}/start/">Start</a></p>
+            {% else %}
+            <p><a href="/user/shelf/{{ shelf.id }}/stop/?next=/shelf/list/" onclick="return confirm('Are you sure?');">Stop</a></p>
+            {% endif %}
+        <p><a href="/shelf/{{ shelf.id }}/edit/">Edit</a></p>
+        <p><a href="/shelf/{{ shelf.id }}/delete/" onclick="return confirm('Are you sure?');">Delete</a></p>
+        {% endif %}
+    </div>
+</div>
+{% endfor %}
+{% endblock %}

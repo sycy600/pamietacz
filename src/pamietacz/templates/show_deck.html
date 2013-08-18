@@ -1,0 +1,23 @@
+{% extends "layout.html" %}
+{% block content %}
+<p><a href="/shelf/{{ deck.shelf.id }}/show/">Deck: {{ deck.name }}</a></p>
+{% if user.is_authenticated %}
+<p><a href="/deck/{{ deck.id }}/card/add/">Add card</a></p>
+{% endif %}
+{% for card in cards %}
+<div class="row">
+    <div class="span8">
+        <h3>Question:</h3>
+        {{ card.question_after_markdown | safe }}
+        <h3>Answer:</h3>
+        {{ card.answer_after_markdown | safe }}
+    </div>
+    <div class="span4">
+        {% if user.is_authenticated %}
+        <p><a href="/card/{{ card.id }}/edit/">Edit</a></p>
+        <p><a href="/card/{{ card.id }}/delete/" onclick="return confirm('Are you sure?');">Delete</a></p>
+        {% endif %}
+    </div>
+</div>
+{% endfor %}
+{% endblock %}

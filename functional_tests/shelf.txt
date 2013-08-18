@@ -1,0 +1,23 @@
+*** Settings ***
+
+Resource  resource.txt
+Suite Setup  Open Browser Then Register Then Login  ${USERNAME}  ${PASSWORD}
+Suite Teardown  Logout Then Close Browser
+
+*** Variables ***
+
+${USERNAME}  ShelfMan
+${PASSWORD}  some_password
+
+*** Test Cases ***
+
+Add New Shelf
+    Go To  ${SERVER}shelf/list/
+    Location Should Be  ${SERVER}shelf/list/
+    Page Should Not Contain  New shelf
+    Click Link  Add a new shelf
+    Location Should Be  ${SERVER}shelf/add/
+    Input Text  name  New shelf
+    Click Button  Submit
+    Page Should Contain  New shelf
+    Location Should Be  ${SERVER}shelf/list/

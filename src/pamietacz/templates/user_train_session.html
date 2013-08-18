@@ -1,0 +1,26 @@
+{% extends "layout.html" %}
+{% block content %}
+
+
+<div class="row">
+    <div class="span8">
+        <h3>Question:</h3>
+        {{ train_card.card.question_after_markdown | safe }}
+        <button type="button" id="show_answer">Show answer</button>
+        <div id="answer">
+            <h3>Answer:</h3>
+            {{ train_card.card.answer_after_markdown | safe }}
+            <form action="{{ request.get_full_path }}" method="post">{% csrf_token %}
+
+            {% for answer in available_answers %}
+            <input type="Submit" value="{{ answer }}" name="{{ answer_parameter_name }}" id="option_{{ forloop.counter }}"/>
+            {% endfor %}
+            </form>
+        </div>
+    </div>
+    <div class="span4">
+    </div>
+</div>
+
+
+{% endblock %}
