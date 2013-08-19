@@ -1,3 +1,5 @@
+.. image:: https://secure.travis-ci.org/sycy600/pamietacz.png
+
 An application for making notes in question-answer form which
 can be later easy revamped and reviewed.
 
