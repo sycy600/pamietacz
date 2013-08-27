@@ -1,4 +1,4 @@
-from django.forms import ModelForm
+from django.forms import ModelForm, Form, FileField
 from django.core.exceptions import ValidationError
 from models import Shelf, Deck, Card
 
@@ -54,3 +54,7 @@ class CardForm(ModelForm):
     class Meta:
         model = Card
         fields = ('question', 'answer')
+
+
+class DataDumpUploadFileForm(Form):
+    data_dump_file = FileField()

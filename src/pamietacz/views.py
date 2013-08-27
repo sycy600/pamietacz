@@ -5,11 +5,17 @@ from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 from django.core.exceptions import PermissionDenied
 from django.http import Http404
-from forms import ShelfForm, DeckForm, CardForm
+from django.http import HttpResponse
+from django.forms.util import ErrorList
+from forms import ShelfForm, DeckForm, CardForm, DataDumpUploadFileForm
 from models import Shelf, Deck, Card, TrainSession, TrainPool, TrainCard
 import datetime
 from collections import OrderedDict
-from utils import backup
+from utils import (backup,
+                   dump_data_as_xml,
+                   load_data_as_xml,
+                   XMLDataDumpException)
+from lxml import etree
 
 
 def shelf_list(request):
@@ -353,3 +359,33 @@ def user_show_deck(request, deck_id):
                   {"deck": deck,
                    "train_cards": train_cards,
                    "datetime_now": datetime.datetime.now()})
+
+
+@require_http_methods(["GET"])
+def dump_data(request):
+    file_content = dump_data_as_xml()
+    file_response = HttpResponse(file_content, content_type="application/xml")
+    content_disposition = 'attachment; filename="dump_data.xml"'
+    file_response["Content-Disposition"] = content_disposition
+    return file_response
+
+
+@login_required
+@backup
+@require_http_methods(["GET", "POST"])
+def load_data(request):
+    if request.method == "GET":
+        upload_form = DataDumpUploadFileForm()
+    elif request.method == "POST":
+        upload_form = DataDumpUploadFileForm(request.POST, request.FILES)
+        if upload_form.is_valid():
+            try:
+                load_data_as_xml(request.FILES["data_dump_file"])
+                return redirect(reverse("pamietacz.views.shelf_list"))
+            except (XMLDataDumpException, etree.XMLSyntaxError) as e:
+                upload_form._errors["data_dump_file"] = ErrorList()
+                error_message = "Error while parsing XML: %s" % str(e)
+                upload_form._errors["data_dump_file"].append(error_message)
+    return render(request, "load_data.html",
+                  {"data_dump_upload_file_form": upload_form,
+                   "action": request.get_full_path()})

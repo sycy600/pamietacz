@@ -38,4 +38,6 @@ urlpatterns = patterns(
      "pamietacz.views.user_train_session"),
     (r"^user/deck/(?P<deck_id>\d+)/show/$",
      "pamietacz.views.user_show_deck"),
+    (r"^data/dump/$", "pamietacz.views.dump_data"),
+    (r"^data/load/$", "pamietacz.views.load_data")
 )
