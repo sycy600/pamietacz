@@ -35,5 +35,5 @@ Unreleased
 * Add: The identical questions in cards can't be placed in single deck
 * Add: Text after Markdown transformation is saved in database in order to make cards loading faster
 * Add: Replaced pep8 and pyflakes with flake8
-* Add: Added possibility to export and import database as XML file
+* Add: User can export and import database as XML file
 * Fix: Question and answer cannot be empty
