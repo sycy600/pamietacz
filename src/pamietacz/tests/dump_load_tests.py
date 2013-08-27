@@ -51,12 +51,12 @@ class DumpLoadTests(TransactionTestCaseWithAuthentication):
         first_shelf_second_deck = all_decks[1]
 
         # Remember questions for next checks.
-        first_shelf_first_deck_first_question = all_cards[0].question
-        first_shelf_first_deck_first_answer = all_cards[0].answer
-        first_shelf_second_deck_first_question = all_cards[1].question
-        first_shelf_second_deck_first_answer = all_cards[1].answer
-        first_shelf_second_deck_second_question = all_cards[2].question
-        first_shelf_second_deck_second_answer = all_cards[2].answer
+        first_deck_first_question = all_cards[0].question
+        first_deck_first_answer = all_cards[0].answer
+        second_deck_first_question = all_cards[1].question
+        second_deck_first_answer = all_cards[1].answer
+        second_deck_second_question = all_cards[2].question
+        second_deck_second_answer = all_cards[2].answer
 
         # Check if correct XML file was generated.
         r = self.client.get("/data/dump/")
@@ -124,17 +124,17 @@ class DumpLoadTests(TransactionTestCaseWithAuthentication):
 
         # Check if loaded cards are the same as previously
         # located in database.
-        self.assertEqual(first_shelf_first_deck_first_question,
+        self.assertEqual(first_deck_first_question,
                          all_cards[0].question)
-        self.assertEqual(first_shelf_first_deck_first_answer,
+        self.assertEqual(first_deck_first_answer,
                          all_cards[0].answer)
-        self.assertEqual(first_shelf_second_deck_first_question,
+        self.assertEqual(second_deck_first_question,
                          all_cards[1].question)
-        self.assertEqual(first_shelf_second_deck_first_answer,
+        self.assertEqual(second_deck_first_answer,
                          all_cards[1].answer)
-        self.assertEqual(first_shelf_second_deck_second_question,
+        self.assertEqual(second_deck_second_question,
                          all_cards[2].question)
-        self.assertEqual(first_shelf_second_deck_second_answer,
+        self.assertEqual(second_deck_second_answer,
                          all_cards[2].answer)
 
         # Check the structure.
