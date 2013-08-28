@@ -10,6 +10,7 @@ Features
 * scheduling algorithm (slightly modified SuperMemo2 algorithm)
   used for reviewing notes
 * Markdown support
+* sharing notes - import/export as XML file
 
 Basics
 ======
