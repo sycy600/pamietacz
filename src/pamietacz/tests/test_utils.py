@@ -1,4 +1,4 @@
-from django.test import TestCase
+from django.test import TestCase, TransactionTestCase
 from django.contrib.auth.models import User
 
 
@@ -20,13 +20,29 @@ def add_card(client, deck_id, question, answer):
     return r
 
 
+def create_and_login_default_user(client):
+    username = "John"
+    password = "some_password"
+    User.objects.create_user(username=username, password=password)
+    client.login(username=username, password=password)
+
+
+def logout_and_delete_user(client):
+    client.logout()
+    User.objects.all().delete()
+
+
 class TestCaseWithAuthentication(TestCase):
     def setUp(self):
-        username = "John"
-        password = "some_password"
-        User.objects.create_user(username=username, password=password)
-        self.client.login(username=username, password=password)
+        create_and_login_default_user(self.client)
 
     def tearDown(self):
-        self.client.logout()
-        User.objects.all().delete()
+        logout_and_delete_user(self.client)
+
+
+class TransactionTestCaseWithAuthentication(TransactionTestCase):
+    def setUp(self):
+        create_and_login_default_user(self.client)
+
+    def tearDown(self):
+        logout_and_delete_user(self.client)

@@ -2,7 +2,9 @@
 {% block content %}
 {% if user.is_authenticated %}
 <p><a href="/shelf/add/">Add a new shelf</a></p>
+<p><a href="/data/load/">Load data</a></p>
 {% endif %}
+<p><a href="/data/dump/">Dump data</a></p>
 <p>Shelves:</p>
 {% for shelf in all_shelves %}
 <div class="row">
