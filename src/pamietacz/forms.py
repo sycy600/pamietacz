@@ -1,6 +1,7 @@
-from django.forms import ModelForm, Form, FileField
+from django.contrib.auth.forms import UserCreationForm
 from django.core.exceptions import ValidationError
-from models import Shelf, Deck, Card
+from django.forms import ModelForm, Form, FileField
+from models import Shelf, Deck, Card, UserProfile
 
 
 class ShelfForm(ModelForm):
@@ -58,3 +59,13 @@ class CardForm(ModelForm):
 
 class DataDumpUploadFileForm(Form):
     data_dump_file = FileField()
+
+
+class UserProfileCreationForm(UserCreationForm):
+    UserCreationForm.Meta.model = UserProfile
+
+    def clean_username(self):
+        cleaned_username = self.cleaned_data["username"]
+        if UserProfile.objects.filter(username=cleaned_username).exists():
+            raise ValidationError(self.error_messages['duplicate_username'])
+        return cleaned_username

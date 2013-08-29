@@ -1,13 +1,17 @@
-from django.views.decorators.http import require_http_methods
-from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 from django.core.exceptions import PermissionDenied
+from django.forms.util import ErrorList
 from django.http import Http404
 from django.http import HttpResponse
-from django.forms.util import ErrorList
-from forms import ShelfForm, DeckForm, CardForm, DataDumpUploadFileForm
+from django.shortcuts import render, redirect, get_object_or_404
+from django.views.decorators.http import require_http_methods
+from forms import (ShelfForm,
+                   DeckForm,
+                   CardForm,
+                   DataDumpUploadFileForm,
+                   UserProfileCreationForm)
 from models import Shelf, Deck, Card, TrainSession, TrainPool, TrainCard
 import datetime
 from collections import OrderedDict
@@ -22,7 +26,7 @@ def shelf_list(request):
     all_shelves = Shelf.objects.all()
     started_shelves_ids = None
     if request.user.is_authenticated():
-        user_profile = request.user.get_profile()
+        user_profile = request.user
         started_shelves = user_profile.shelves.all()
         started_shelves_ids = [shelf.id for shelf in started_shelves]
     return render(request,
@@ -177,7 +181,7 @@ def register(request):
     if request.method == "GET":
         register_form = UserCreationForm()
     elif request.method == "POST":
-        register_form = UserCreationForm(request.POST)
+        register_form = UserProfileCreationForm(request.POST)
         if register_form.is_valid():
             register_form.save()
             return redirect(reverse("pamietacz.views.user_shelves"))
@@ -189,7 +193,7 @@ def register(request):
 @login_required
 @require_http_methods(["GET"])
 def user_shelves(request):
-    profile = request.user.get_profile()
+    profile = request.user
     shelves = profile.shelves.all()
     items_to_train_dict = {}
     for shelf in shelves:
@@ -210,7 +214,7 @@ def user_shelves(request):
 @require_http_methods(["GET"])
 def start_shelf(request, shelf_id):
     shelf = get_object_or_404(Shelf, pk=shelf_id)
-    profile = request.user.get_profile()
+    profile = request.user
     profile.shelves.add(shelf)
     profile.save()
     return redirect(reverse("pamietacz.views.shelf_list"))
@@ -221,7 +225,7 @@ def start_shelf(request, shelf_id):
 @require_http_methods(["GET"])
 def stop_shelf(request, shelf_id):
     shelf = get_object_or_404(Shelf, pk=shelf_id)
-    profile = request.user.get_profile()
+    profile = request.user
     profile.shelves.remove(shelf)
     profile.save()
     decks = Deck.objects.filter(shelf=shelf)
@@ -240,7 +244,7 @@ def stop_shelf(request, shelf_id):
 @require_http_methods(["GET"])
 def user_show_shelf(request, shelf_id):
     shelf = get_object_or_404(Shelf, pk=shelf_id)
-    profile = request.user.get_profile()
+    profile = request.user
     if not profile.started_shelf(shelf):
         raise Http404
     decks = Deck.objects.filter(shelf=shelf)
@@ -274,7 +278,7 @@ def user_train_deck(request, deck_id, all_cards=False):
     create/get train pool, create/get train session."""
     deck = get_object_or_404(Deck, pk=deck_id)
     shelf = deck.shelf
-    profile = request.user.get_profile()
+    profile = request.user
     if not profile.started_shelf(shelf):
         raise Http404
     train_pool = TrainPool.create_or_get_train_pool(profile, deck)
@@ -302,7 +306,7 @@ AVAILABLE_ANSWERS = OrderedDict([("Good", 5), ("Bad", 0)])
 def user_train_session(request, session_id):
     """This method displays appropriate question for given session."""
     train_session = get_object_or_404(TrainSession, pk=session_id)
-    profile = request.user.get_profile()
+    profile = request.user
     # Check if user can do this session.
     if train_session.userprofile.id != profile.id:
         raise PermissionDenied
@@ -344,7 +348,7 @@ def user_train_session(request, session_id):
 @require_http_methods(["GET"])
 def user_show_deck(request, deck_id):
     deck = get_object_or_404(Deck, pk=deck_id)
-    profile = request.user.get_profile()
+    profile = request.user
     if not profile.started_shelf(deck.shelf):
         raise Http404
 
