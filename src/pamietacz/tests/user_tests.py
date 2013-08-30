@@ -1,14 +1,13 @@
 from django.http import (HttpResponseRedirect,
                          HttpResponseForbidden,
                          HttpResponseNotFound)
-from django.contrib.auth.models import User
 from pamietacz.models import (Shelf,
-                              UserProfile,
                               Deck,
                               Card,
                               TrainSession,
                               TrainPool,
-                              TrainCard)
+                              TrainCard,
+                              UserProfile)
 from test_utils import (add_shelf,
                         add_deck,
                         add_card,
@@ -413,7 +412,7 @@ class TrainTests(TestCaseWithAuthentication):
         self.assertEqual(r.status_code, 200)
 
         # Login as other user.
-        User.objects.create_user(username="Other", password="Password")
+        UserProfile.objects.create_user(username="Other", password="Password")
         self.client.logout()
         self.client.login(username="Other", password="Password")
 

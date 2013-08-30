@@ -26,4 +26,4 @@ DATABASES = {
 LOGIN_REDIRECT_URL = "/"
 LOGIN_URL = "/login/"
 
-AUTH_PROFILE_MODULE = "pamietacz.UserProfile"
+AUTH_USER_MODEL = "pamietacz.UserProfile"

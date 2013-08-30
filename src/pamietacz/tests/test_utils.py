@@ -1,5 +1,5 @@
 from django.test import TestCase, TransactionTestCase
-from django.contrib.auth.models import User
+from pamietacz.models import UserProfile
 
 
 def add_shelf(client, shelf_name):
@@ -23,13 +23,13 @@ def add_card(client, deck_id, question, answer):
 def create_and_login_default_user(client):
     username = "John"
     password = "some_password"
-    User.objects.create_user(username=username, password=password)
+    UserProfile.objects.create_user(username=username, password=password)
     client.login(username=username, password=password)
 
 
 def logout_and_delete_user(client):
     client.logout()
-    User.objects.all().delete()
+    UserProfile.objects.all().delete()
 
 
 class TestCaseWithAuthentication(TestCase):

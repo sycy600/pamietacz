@@ -1,7 +1,6 @@
+from django.contrib.auth.models import AbstractUser, UserManager
 from django.core.exceptions import ValidationError
 from django.db import models
-from django.contrib.auth.models import User
-from django.db.models.signals import post_save
 import re
 import random
 import datetime
@@ -59,20 +58,13 @@ class Card(models.Model):
         super(Card, self).save(*args, **kwargs)
 
 
-class UserProfile(models.Model):
-    user = models.OneToOneField(User)
+class UserProfile(AbstractUser):
     shelves = models.ManyToManyField(Shelf)
+
+    objects = UserManager()
 
     def started_shelf(self, shelf):
         return shelf in self.shelves.all()
-
-
-def create_user_profile(sender, instance, created, **kwargs):
-    if created:
-        profile = UserProfile(user=instance)
-        profile.save()
-
-post_save.connect(create_user_profile, sender=User)
 
 
 class TrainCard(models.Model):
