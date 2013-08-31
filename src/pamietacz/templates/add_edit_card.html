@@ -2,6 +2,29 @@
 {% block content %}
 <form action="{{ action }}" method="post">{% csrf_token %}
 {{ card_form.as_p }}
+
+<p><label for="fileupload">Upload image:</label> <input id="fileupload" type="file" name="uploaded_file" data-url="/file/upload"></p>
+<div id="uploaded_results">
+
+</div>
+
 <input type="submit" value="Submit" />
 </form>
+{% endblock %}
+{% block additional_javascript %}
+<script src="{{ STATIC_URL }}js/vendor/jquery.ui.widget.js"></script>
+<script src="{{ STATIC_URL }}js/vendor/jquery.iframe-transport.js"></script>
+<script src="{{ STATIC_URL }}js/vendor/jquery.fileupload.js"></script>
+<script>
+$(function () {
+    $("#fileupload").fileupload({
+        done: function (e, data) {
+            $("#uploaded_results").prepend('<p class="text-success">![alt](/uploaded/' + encodeURIComponent(data.result) + ")</p>");
+        },
+        fail: function (e, data) {
+            $("#uploaded_results").prepend('<p class="text-error">could not upload file: ' + data.files[0].name +  "</p>");
+        }
+    });
+});
+</script>
 {% endblock %}

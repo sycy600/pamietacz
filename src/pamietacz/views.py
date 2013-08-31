@@ -4,14 +4,17 @@ from django.core.urlresolvers import reverse
 from django.core.exceptions import PermissionDenied
 from django.forms.util import ErrorList
 from django.http import Http404
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseBadRequest
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.decorators.http import require_http_methods
+from django.core.files.storage import default_storage
+from django.core.files.base import ContentFile
 from forms import (ShelfForm,
                    DeckForm,
                    CardForm,
                    DataDumpUploadFileForm,
-                   UserProfileCreationForm)
+                   UserProfileCreationForm,
+                   UploadedImage)
 from models import Shelf, Deck, Card, TrainSession, TrainPool, TrainCard
 import datetime
 from collections import OrderedDict
@@ -163,6 +166,18 @@ def add_edit_card(request, deck_id=None, card_id=None):
                   "add_edit_card.html",
                   {"card_form": card_form,
                    "action": request.get_full_path()})
+
+
+@login_required
+@require_http_methods(["POST"])
+def upload_file(request):
+    uploaded_image = UploadedImage(request.POST, request.FILES)
+    if uploaded_image.is_valid():
+        filename = request.FILES["uploaded_file"].name
+        content_of_file = ContentFile(request.FILES["uploaded_file"].read())
+        saved_as = default_storage.save(filename, content_of_file)
+        return HttpResponse(saved_as)
+    return HttpResponseBadRequest()
 
 
 @login_required
