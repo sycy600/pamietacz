@@ -14,10 +14,10 @@ ${PASSWORD}  some_password
 Add New Shelf
     Go To  ${SERVER}shelf/list/
     Location Should Be  ${SERVER}shelf/list/
-    Page Should Not Contain  New shelf
+    Page Should Not Contain  New shelf2
     Click Link  Add a new shelf
     Location Should Be  ${SERVER}shelf/add/
-    Input Text  name  New shelf
+    Input Text  name  New shelf2
     Click Button  Submit
-    Page Should Contain  New shelf
+    Page Should Contain  New shelf2
     Location Should Be  ${SERVER}shelf/list/
