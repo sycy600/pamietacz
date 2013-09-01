@@ -10,7 +10,7 @@ from test_utils import (add_shelf,
                         add_deck,
                         add_card,
                         TestCaseWithAuthentication)
-import Image
+from PIL import Image
 import StringIO
 import shutil
 import os
