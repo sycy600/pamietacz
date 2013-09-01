@@ -72,4 +72,4 @@ class UserProfileCreationForm(UserCreationForm):
 
 
 class UploadedImage(Form):
-    uploaded_file = ImageField()
+    uploaded_image = ImageField()

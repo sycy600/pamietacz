@@ -3,12 +3,13 @@
 <form action="{{ action }}" method="post">{% csrf_token %}
 {{ card_form.as_p }}
 
-<p><label for="fileupload">Upload image:</label> <input id="fileupload" type="file" name="uploaded_file" data-url="/file/upload"></p>
+<input type="submit" value="Submit" />
+</form>
+<form>{% csrf_token %}
+<p><label for="fileupload">Upload image:</label> <input id="fileupload" type="file" name="uploaded_image" data-url="/image/upload/"></p>
 <div id="uploaded_results">
 
 </div>
-
-<input type="submit" value="Submit" />
 </form>
 {% endblock %}
 {% block additional_javascript %}
@@ -22,7 +23,7 @@ $(function () {
             $("#uploaded_results").prepend('<p class="text-success">![alt](/uploaded/' + encodeURIComponent(data.result) + ")</p>");
         },
         fail: function (e, data) {
-            $("#uploaded_results").prepend('<p class="text-error">could not upload file: ' + data.files[0].name +  "</p>");
+            $("#uploaded_results").prepend('<p class="text-error">could not upload image: ' + data.files[0].name +  "</p>");
         }
     });
 });

@@ -2,7 +2,7 @@
 {% block content %}
 <p><a href="/shelf/{{ deck.shelf.id }}/show/">Deck: {{ deck.name }}</a></p>
 {% if user.is_authenticated %}
-<p><a href="/deck/{{ deck.id }}/card/add/">Add card</a></p>
+<p><a id="add_card" href="/deck/{{ deck.id }}/card/add/">Add card</a></p>
 {% endif %}
 {% for card in cards %}
 <div class="row">

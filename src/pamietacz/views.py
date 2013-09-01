@@ -170,11 +170,11 @@ def add_edit_card(request, deck_id=None, card_id=None):
 
 @login_required
 @require_http_methods(["POST"])
-def upload_file(request):
+def upload_image(request):
     uploaded_image = UploadedImage(request.POST, request.FILES)
     if uploaded_image.is_valid():
-        filename = request.FILES["uploaded_file"].name
-        content_of_file = ContentFile(request.FILES["uploaded_file"].read())
+        filename = request.FILES["uploaded_image"].name
+        content_of_file = ContentFile(request.FILES["uploaded_image"].read())
         saved_as = default_storage.save(filename, content_of_file)
         return HttpResponse(saved_as)
     return HttpResponseBadRequest()
