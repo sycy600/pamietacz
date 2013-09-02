@@ -1,5 +1,7 @@
 from django.conf.urls import patterns
 from django.contrib.auth.forms import AuthenticationForm
+from django.conf import settings
+from django.conf.urls.static import static
 
 urlpatterns = patterns(
     '',
@@ -16,6 +18,8 @@ urlpatterns = patterns(
     (r"^deck/(?P<deck_id>\d+)/show/$", "pamietacz.views.show_deck"),
     (r"^deck/(?P<deck_id>\d+)/card/add/$",
      "pamietacz.views.add_edit_card"),
+    (r"^image/upload/$",
+     "pamietacz.views.upload_image"),
     (r"^card/(?P<card_id>\d+)/edit/$", "pamietacz.views.add_edit_card"),
     (r"^card/(?P<card_id>\d+)/delete/$", "pamietacz.views.delete_card"),
     (r"^register/$", "pamietacz.views.register"),
@@ -40,4 +44,4 @@ urlpatterns = patterns(
      "pamietacz.views.user_show_deck"),
     (r"^data/dump/$", "pamietacz.views.dump_data"),
     (r"^data/load/$", "pamietacz.views.load_data")
-)
+) + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

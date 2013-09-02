@@ -27,3 +27,5 @@ LOGIN_REDIRECT_URL = "/"
 LOGIN_URL = "/login/"
 
 AUTH_USER_MODEL = "pamietacz.UserProfile"
+
+MEDIA_URL = '/uploaded/'

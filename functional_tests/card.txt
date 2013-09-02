@@ -1,0 +1,39 @@
+*** Settings ***
+
+Resource  resource.txt
+Suite Setup  Open Browser Then Register Then Login  ${USERNAME}  ${PASSWORD}
+Suite Teardown  Logout Then Close Browser
+
+*** Variables ***
+
+${USERNAME}  ShelfMan
+${PASSWORD}  some_password
+
+*** Test Cases ***
+
+Add New Card
+    Go To  ${SERVER}shelf/list/
+    Click Link  Add a new shelf
+    Wait Until Page Contains Element  id_name
+    Input Text  name  New shelf
+    Click Button  Submit
+    Wait Until Page Contains  New shelf
+    Click Link  New shelf
+    Wait Until Page Contains Element  add_deck
+    Click Link  Add a new deck
+    Wait Until Page Contains Element  id_name
+    Input Text  name  New deck
+    Click Button  Submit
+    Wait Until Page Contains  New deck
+    Click Link  New deck (0)
+    Wait Until Page Contains Element  add_card
+    Click Link  Add card
+    Wait Until Page Contains Element  id_question
+    Input Text  id_question  How are you?
+    Input Text  id_answer  Thanks, I am fine
+    Click Button  Submit
+    Go To  ${SERVER}deck/1/show/
+    Page Should Contain  How are you?
+    Page Should Contain  Thanks, I am fine
+    
+    

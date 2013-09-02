@@ -1,11 +1,19 @@
-from django.http import HttpResponseRedirect, HttpResponseNotFound
-from django.test import TestCase
+from django.conf import settings
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.db import IntegrityError
+from django.http import (HttpResponseRedirect,
+                         HttpResponseNotFound,
+                         HttpResponseBadRequest)
+from django.test import TestCase
 from pamietacz.models import Shelf, Deck, Card
 from test_utils import (add_shelf,
                         add_deck,
                         add_card,
                         TestCaseWithAuthentication)
+from PIL import Image
+import StringIO
+import shutil
+import os
 
 
 class AddCardTests(TestCaseWithAuthentication):
@@ -283,3 +291,85 @@ class NotAuthenticatedCardTests(TestCase):
         r = self.client.get("/card/%d/delete/" % 777)
         self.assertEqual(r.status_code, HttpResponseRedirect.status_code)
         self.assertIn("login", r.get("location"))
+
+
+class UploadImageTests(TestCaseWithAuthentication):
+    def setUp(self):
+        super(UploadImageTests, self).setUp()
+        if os.path.isdir(settings.MEDIA_ROOT):
+            shutil.rmtree(settings.MEDIA_ROOT)
+
+    def tearDown(self):
+        super(UploadImageTests, self).tearDown()
+        if os.path.isdir(settings.MEDIA_ROOT):
+            shutil.rmtree(settings.MEDIA_ROOT)
+
+    def test_upload_image(self):
+        # Create image.
+        new_image = Image.new("RGB", (10, 10), (255, 255, 255))
+        image_data = StringIO.StringIO()
+        new_image.save(image_data, format="PNG")
+        sent_file = SimpleUploadedFile("image_file.png",
+                                       image_data.getvalue())
+
+        # Check if image already doesn't exist.
+        self.assertFalse(os.path.isfile(os.path.join(settings.MEDIA_ROOT,
+                                                     "image_file.png")))
+
+        # Upload image.
+        r = self.client.post("/image/upload/", {"uploaded_image": sent_file})
+        self.assertEqual(r.status_code, 200)
+
+        # The name of image is returned in response.
+        self.assertEqual(r.content, "image_file.png")
+
+        # Check if now image exists.
+        self.assertTrue(os.path.isfile(os.path.join(settings.MEDIA_ROOT,
+                                                    "image_file.png")))
+
+    def test_upload_file_which_is_not_image(self):
+        """Only images can be uploaded. Other file types are discarded."""
+        sent_file = SimpleUploadedFile("image_file.txt", "some text")
+        self.assertFalse(os.path.isfile(os.path.join(settings.MEDIA_ROOT,
+                                                     "image_file.png")))
+        r = self.client.post("/image/upload/", {"uploaded_image": sent_file})
+
+        # 400 error is returned when some other filetype than
+        # image is uploaded.
+        self.assertEqual(r.status_code, HttpResponseBadRequest.status_code)
+        self.assertEqual(r.content, "")
+        self.assertFalse(os.path.isfile(os.path.join(settings.MEDIA_ROOT,
+                                                     "image_file.png")))
+
+    def test_upload_file_with_the_same_name(self):
+        """When uploaded file already exists, then Django takes care by
+        adding appropriate suffix to make image name unique."""
+
+        # Create image.
+        new_image = Image.new("RGB", (10, 10), (255, 255, 255))
+        image_data = StringIO.StringIO()
+        new_image.save(image_data, format="PNG")
+        first_image = SimpleUploadedFile("image_file.png",
+                                         image_data.getvalue())
+
+        # Upload first image.
+        self.assertFalse(os.path.isfile(os.path.join(settings.MEDIA_ROOT,
+                                                     "image_file.png")))
+        r = self.client.post("/image/upload/",
+                             {"uploaded_image": first_image})
+        self.assertEqual(r.status_code, 200)
+        self.assertEqual(r.content, "image_file.png")
+        self.assertTrue(os.path.isfile(os.path.join(settings.MEDIA_ROOT,
+                                                    "image_file.png")))
+
+        # Upload second image with the same name.
+        second_image = SimpleUploadedFile("image_file.png",
+                                          image_data.getvalue())
+        r = self.client.post("/image/upload/",
+                             {"uploaded_image": second_image})
+        self.assertEqual(r.status_code, 200)
+
+        # Suffix _1 is added to file name.
+        self.assertEqual(r.content, "image_file_1.png")
+        self.assertTrue(os.path.isfile(os.path.join(settings.MEDIA_ROOT,
+                                                    "image_file_1.png")))

@@ -1,6 +1,6 @@
 from django.contrib.auth.forms import UserCreationForm
 from django.core.exceptions import ValidationError
-from django.forms import ModelForm, Form, FileField
+from django.forms import ModelForm, Form, FileField, ImageField
 from models import Shelf, Deck, Card, UserProfile
 
 
@@ -69,3 +69,7 @@ class UserProfileCreationForm(UserCreationForm):
         if UserProfile.objects.filter(username=cleaned_username).exists():
             raise ValidationError(self.error_messages['duplicate_username'])
         return cleaned_username
+
+
+class UploadedImage(Form):
+    uploaded_image = ImageField()

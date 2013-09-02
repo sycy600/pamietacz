@@ -29,7 +29,7 @@ Initialize database::
 
 Run application (application is accessible at http://localhost:8000)::
 
-    bin/django runserver
+    bin/django runserver --settings=pamietacz.production
 
 Testing
 =======
@@ -55,3 +55,14 @@ Run unit tests, check flake8::
 Run functional tests, unit tests, flake8::
 
     bin/long-check
+
+Run single functional tests::
+
+    bin/functional-tests functional_tests/card.txt
+
+Data migration
+==============
+
+To migrate the data to other environment, dump database as XML file
+and load it in other environment. Also copy images placed in
+``uploaded`` directory.

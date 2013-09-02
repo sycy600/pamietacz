@@ -36,4 +36,5 @@ Unreleased
 * Add: Text after Markdown transformation is saved in database in order to make cards loading faster
 * Add: Replaced pep8 and pyflakes with flake8
 * Add: User can export and import database as XML file
+* Add: User can upload images when adding or editing card
 * Fix: Question and answer cannot be empty

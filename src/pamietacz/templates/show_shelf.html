@@ -1,7 +1,7 @@
 {% extends "layout.html" %}
 {% block content %}
 {% if user.is_authenticated %}
-<p><a href="/shelf/{{ shelf.id }}/deck/add/">Add a new deck</a></p>
+<p><a id="add_deck" href="/shelf/{{ shelf.id }}/deck/add/">Add a new deck</a></p>
 {% endif %}
 <p>Decks:</p>
 {% for deck in decks %}
