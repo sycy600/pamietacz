@@ -9,6 +9,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.views.decorators.http import require_http_methods
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
+
 from forms import (ShelfForm,
                    DeckForm,
                    CardForm,
@@ -71,7 +72,7 @@ def delete_shelf(request, shelf_id):
 @require_http_methods(["GET"])
 def show_shelf(request, shelf_id):
     shelf = get_object_or_404(Shelf, pk=shelf_id)
-    decks = Deck.objects.filter(shelf=shelf)
+    decks = Deck.objects.filter(shelf=shelf).order_by("order")
     return render(request,
                   "show_shelf.html",
                   {"shelf": shelf, "decks": decks})
@@ -112,6 +113,19 @@ def delete_deck(request, deck_id):
     deck = get_object_or_404(Deck, pk=deck_id)
     shelf_id = deck.shelf.id
     deck.delete()
+    return redirect(reverse("pamietacz.views.show_shelf", args=(shelf_id,)))
+
+
+@login_required
+@backup
+@require_http_methods(["GET"])
+def move_deck(request, deck_id, direction):
+    deck = get_object_or_404(Deck, pk=deck_id)
+    shelf_id = deck.shelf.id
+    if direction in ("up", "down"):
+        deck.move(direction)
+    else:
+        raise Http404
     return redirect(reverse("pamietacz.views.show_shelf", args=(shelf_id,)))
 
 
@@ -262,7 +276,7 @@ def user_show_shelf(request, shelf_id):
     profile = request.user
     if not profile.started_shelf(shelf):
         raise Http404
-    decks = Deck.objects.filter(shelf=shelf)
+    decks = Deck.objects.filter(shelf=shelf).order_by("order")
 
     # Check if some sessions were started and if so
     # then display link Continue session instead of Train.

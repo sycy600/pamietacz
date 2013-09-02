@@ -18,6 +18,8 @@ urlpatterns = patterns(
     (r"^deck/(?P<deck_id>\d+)/show/$", "pamietacz.views.show_deck"),
     (r"^deck/(?P<deck_id>\d+)/card/add/$",
      "pamietacz.views.add_edit_card"),
+    (r"^deck/(?P<deck_id>\d+)/move/(?P<direction>down|up)/$",
+     "pamietacz.views.move_deck"),
     (r"^image/upload/$",
      "pamietacz.views.upload_image"),
     (r"^card/(?P<card_id>\d+)/edit/$", "pamietacz.views.add_edit_card"),
