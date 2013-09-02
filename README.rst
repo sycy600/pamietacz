@@ -9,7 +9,7 @@ Features
 * managing notes in question-answer form
 * scheduling algorithm (slightly modified SuperMemo2 algorithm)
   used for reviewing notes
-* Markdown support
+* simple editor: Markdown support, upload images
 * sharing notes - import/export as XML file
 
 Basics
