@@ -11,8 +11,12 @@
     </div>
     <div class="span4">
         {% if user.is_authenticated %}
-        <p><a href="/deck/{{ deck.id }}/move/up/">Move up</a></p>
-        <p><a href="/deck/{{ deck.id }}/move/down/">Move down</a></p>
+            {% if not forloop.last %}
+                <p><a href="/deck/{{ deck.id }}/move/up/">Move up</a></p>
+            {% endif %}
+            {% if not forloop.first %}
+                <p><a href="/deck/{{ deck.id }}/move/down/">Move down</a></p>
+            {% endif %}
         <p><a href="/deck/{{ deck.id }}/edit/">Edit</a></p>
         <p><a href="/deck/{{ deck.id }}/delete/" onclick="return confirm('Are you sure?');">Delete</a></p>
         {% endif %}
