@@ -1,3 +1,4 @@
+from django.contrib.auth.hashers import make_password
 from django.test import TestCase, TransactionTestCase
 from pamietacz.models import UserProfile
 
@@ -20,10 +21,17 @@ def add_card(client, deck_id, question, answer):
     return r
 
 
+username = "John"
+password = "some_password"
+# It looks like that creating of password hash can take several
+# seconds for all tests so it's faster to do it once outside
+# test setup method.
+hashed_password = make_password(password)
+
+
 def create_and_login_default_user(client):
-    username = "John"
-    password = "some_password"
-    UserProfile.objects.create_user(username=username, password=password)
+    user = UserProfile(username=username, password=hashed_password)
+    user.save()
     client.login(username=username, password=password)
 
 
