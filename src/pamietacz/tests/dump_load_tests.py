@@ -7,15 +7,15 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 
 
 class DumpLoadTests(TransactionTestCaseWithAuthentication):
-    def test_add_card(self):
+    def test_dump_and_load(self):
         # Add shelves.
         add_shelf(self.client, "1st shelf")
         add_shelf(self.client, "2nd shelf><\"&")
         add_shelf(self.client, "3rd shelf")
 
-        # Add deck.
-        all_shelfs = Shelf.objects.all()
-        first_shelf = all_shelfs[0]
+        # Add decks.
+        all_shelves = Shelf.objects.all()
+        first_shelf = all_shelves[0]
         add_deck(self.client, first_shelf.id, "1st shelf 1st deck><\"&")
         add_deck(self.client, first_shelf.id, "1st shelf 2nd deck")
 
@@ -38,13 +38,13 @@ class DumpLoadTests(TransactionTestCaseWithAuthentication):
 
         # Check the number of added shelves, decks and cards.
         self.assertEqual(len(all_cards), 3)
-        self.assertEqual(len(all_shelfs), 3)
+        self.assertEqual(len(all_shelves), 3)
         self.assertEqual(len(all_decks), 2)
 
         # Remember shelves for next checks.
-        first_shelf = all_shelfs[0]
-        second_shelf = all_shelfs[1]
-        third_shelf = all_shelfs[2]
+        first_shelf = all_shelves[0]
+        second_shelf = all_shelves[1]
+        third_shelf = all_shelves[2]
 
         # Remember decks for next checks.
         first_shelf_first_deck = all_decks[0]
@@ -102,20 +102,20 @@ class DumpLoadTests(TransactionTestCaseWithAuthentication):
                              follow=True)
         self.assertEqual(200, r.status_code)
 
-        all_shelfs = Shelf.objects.all()
+        all_shelves = Shelf.objects.all()
         all_decks = Deck.objects.all()
         all_cards = Card.objects.all()
 
         # Check number of loaded cards from file.
         self.assertEqual(len(all_cards), 3)
-        self.assertEqual(len(all_shelfs), 3)
+        self.assertEqual(len(all_shelves), 3)
         self.assertEqual(len(all_decks), 2)
 
         # Check if loaded shelves are the same as previously
         # located in database.
-        self.assertEqual(first_shelf, all_shelfs[0])
-        self.assertEqual(second_shelf, all_shelfs[1])
-        self.assertEqual(third_shelf, all_shelfs[2])
+        self.assertEqual(first_shelf, all_shelves[0])
+        self.assertEqual(second_shelf, all_shelves[1])
+        self.assertEqual(third_shelf, all_shelves[2])
 
         # Check if loaded decks are the same as previously
         # located in database.
@@ -139,10 +139,10 @@ class DumpLoadTests(TransactionTestCaseWithAuthentication):
 
         # Check the structure.
         # first shelf first deck
-        self.assertEqual(all_decks[0].shelf, all_shelfs[0])
+        self.assertEqual(all_decks[0].shelf, all_shelves[0])
 
         # first shelf second deck
-        self.assertEqual(all_decks[1].shelf, all_shelfs[0])
+        self.assertEqual(all_decks[1].shelf, all_shelves[0])
 
         # first shelf first deck first card
         self.assertEqual(all_cards[0].deck, all_decks[0])
@@ -247,3 +247,30 @@ class DumpLoadTests(TransactionTestCaseWithAuthentication):
         self.assertEqual(len(Card.objects.all()), 0)
         self.assertEqual(len(Shelf.objects.all()), 0)
         self.assertEqual(len(Deck.objects.all()), 0)
+
+    def test_order_of_decks_is_taken_into_account(self):
+        """Order of decks is kept in XML dump so that decks are sorted
+        by order."""
+
+        add_shelf(self.client, "first shelf")
+
+        # Add decks.
+        all_shelves = Shelf.objects.all()
+        add_deck(self.client, all_shelves[0].id, "first deck")
+        add_deck(self.client, all_shelves[0].id, "second deck")
+
+        all_decks = Deck.objects.all()
+
+        # Move first shelf up.
+        self.client.get("/deck/%d/move/up/" % all_decks[0].id)
+
+        # Second shelf is listed as first and first shelf is listed as second.
+        r = self.client.get("/data/dump/")
+        c = ("""<?xml version='1.0' encoding='UTF-8'?>\n"""
+             """<data>\n"""
+             """  <shelf name="first shelf">\n"""
+             """    <deck name="second deck"/>\n"""
+             """    <deck name="first deck"/>\n"""
+             """  </shelf>\n"""
+             """</data>\n""")
+        self.assertEqual(c, r.content)
