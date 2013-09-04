@@ -169,7 +169,7 @@ class TrainPool(models.Model):
         train_pool.save()
         return train_pool
 
-    def items_to_train(self):
+    def number_of_cards_to_repeat_now(self):
         items = 0
         for train_card in self.train_cards.all():
             if train_card.time_to_show <= datetime.datetime.now():
