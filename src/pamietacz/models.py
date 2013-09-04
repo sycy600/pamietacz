@@ -1,16 +1,16 @@
 from django.contrib.auth.models import AbstractUser, UserManager
 from django.core.exceptions import ValidationError
-from django.db import models
+from django.db import models, transaction
 import re
 import random
 import datetime
 from markdown import Markdown
 
 
-markdown_instance = Markdown(extensions=['tables',
-                                         'fenced_code',
-                                         'codehilite'],
-                             output_format='html5')
+markdown_instance = Markdown(extensions=["tables",
+                                         "fenced_code",
+                                         "codehilite"],
+                             output_format="html5")
 
 
 def whitespace_validator(text):
@@ -32,10 +32,43 @@ class Deck(models.Model):
     name = models.CharField(max_length=128,
                             blank=False,
                             validators=[whitespace_validator])
+    order = models.PositiveIntegerField(blank=False)
     shelf = models.ForeignKey(Shelf)
 
     def clean(self):
         self.name = self.name.strip()
+
+    def delete(self):
+        decks_to_update = Deck.objects.filter(shelf=self.shelf,
+                                              order__gt=self.order)
+        decks_to_update.update(order=models.F("order") - 1)
+        super(Deck, self).delete()
+
+    @transaction.commit_on_success
+    def move(self, direction):
+        try:
+            if direction == "up":
+                order = self.order + 1
+            elif direction == "down":
+                order = self.order - 1
+            else:
+                raise ValueError("Unknown order: %s" % order)
+            deck_nearby = Deck.objects.get(shelf=self.shelf, order=order)
+            deck_nearby.order, self.order = self.order, deck_nearby.order
+            self.save()
+            deck_nearby.save()
+        except Deck.DoesNotExist:
+            pass
+
+    def save(self, *args, **kwargs):
+        if self.pk is None:
+            if Deck.objects.count() == 0:
+                self.order = 0
+            else:
+                decks_to_search = Deck.objects.filter(shelf=self.shelf)
+                max_query = decks_to_search.aggregate(models.Max("order"))
+                self.order = max_query["order__max"] + 1
+        super(Deck, self).save(*args, **kwargs)
 
 
 class Card(models.Model):

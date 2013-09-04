@@ -31,6 +31,9 @@ class AddDeckTests(TestCaseWithAuthentication):
         self.assertEqual(deck.shelf.id, shelf.id)
         self.assertEqual(deck.name, deck_name)
 
+        # First deck has order 0 which means that it's first.
+        self.assertEqual(deck.order, 0)
+
         # Deck is shown on shelf page.
         r = self.client.get("/shelf/%s/show/" % shelf.id)
         self.assertIn(deck_name, r.content)
@@ -159,3 +162,203 @@ class NotAuthenticatedDeckTests(TestCase):
         r = self.client.get("/deck/%d/delete/" % 777)
         self.assertEqual(r.status_code, HttpResponseRedirect.status_code)
         self.assertIn("login", r.get("location"))
+
+
+class MovingDecks(TestCaseWithAuthentication):
+    def test_add_multiple_decks_and_check_order(self):
+        shelf_name = "Some nice shelf"
+        first_deck_name = "First deck"
+        second_deck_name = "Second deck"
+        third_deck_name = "Third deck"
+
+        add_shelf(self.client, shelf_name)
+
+        # Add decks.
+        shelf = Shelf.objects.all()[0]
+        add_deck(self.client, shelf.id, first_deck_name)
+        add_deck(self.client, shelf.id, second_deck_name)
+        add_deck(self.client, shelf.id, third_deck_name)
+
+        all_decks = Deck.objects.all()
+        # Each new added deck has order so it's maximum value
+        # of other orders + 1
+        self.assertEqual(all_decks[0].order, 0)
+        self.assertEqual(all_decks[1].order, 1)
+        self.assertEqual(all_decks[2].order, 2)
+
+    def test_delete_decks_and_check_order(self):
+        shelf_name = "Some nice shelf"
+        first_deck_name = "First deck"
+        second_deck_name = "Second deck"
+        third_deck_name = "Third deck"
+
+        add_shelf(self.client, shelf_name)
+
+        # Add decks.
+        shelf = Shelf.objects.all()[0]
+        add_deck(self.client, shelf.id, first_deck_name)
+        add_deck(self.client, shelf.id, second_deck_name)
+        add_deck(self.client, shelf.id, third_deck_name)
+
+        all_decks = Deck.objects.all()
+
+        self.assertEqual(len(all_decks), 3)
+
+        # Delete deck in the middle.
+        self.client.get("/deck/%d/delete/" % all_decks[1].id)
+
+        all_decks = Deck.objects.all()
+
+        # Order of last deck (third deck) was decreased in order
+        # to achieve continuity.
+        self.assertEqual(len(all_decks), 2)
+        self.assertEqual(all_decks[0].order, 0)
+        self.assertEqual(all_decks[0].name, first_deck_name)
+        self.assertEqual(all_decks[1].order, 1)
+        self.assertEqual(all_decks[1].name, third_deck_name)
+
+    def test_move_deck_up(self):
+        shelf_name = "Some nice shelf"
+        first_deck_name = "First deck"
+        second_deck_name = "Second deck"
+        third_deck_name = "Third deck"
+
+        add_shelf(self.client, shelf_name)
+
+        # Add decks.
+        shelf = Shelf.objects.all()[0]
+        add_deck(self.client, shelf.id, first_deck_name)
+        add_deck(self.client, shelf.id, second_deck_name)
+        add_deck(self.client, shelf.id, third_deck_name)
+
+        all_decks = Deck.objects.all()
+
+        # Initial orders:
+        # 0 first deck
+        # 1 second deck
+        # 2 third deck
+        self.assertEqual(all_decks[0].order, 0)
+        self.assertEqual(all_decks[0].name, first_deck_name)
+        self.assertEqual(all_decks[1].order, 1)
+        self.assertEqual(all_decks[1].name, second_deck_name)
+        self.assertEqual(all_decks[2].order, 2)
+        self.assertEqual(all_decks[2].name, third_deck_name)
+
+        self.client.get("/deck/%d/move/up/" % all_decks[0].id)
+
+        all_decks = Deck.objects.all()
+
+        # Move first deck up:
+        # 0 second deck
+        # 1 first deck
+        # 2 third deck
+        self.assertEqual(all_decks[0].order, 1)
+        self.assertEqual(all_decks[0].name, first_deck_name)
+        self.assertEqual(all_decks[1].order, 0)
+        self.assertEqual(all_decks[1].name, second_deck_name)
+        self.assertEqual(all_decks[2].order, 2)
+        self.assertEqual(all_decks[2].name, third_deck_name)
+
+        self.client.get("/deck/%d/move/up/" % all_decks[0].id)
+
+        all_decks = Deck.objects.all()
+
+        # Move first deck up:
+        # 0 second deck
+        # 1 third deck
+        # 2 first deck
+        self.assertEqual(all_decks[0].order, 2)
+        self.assertEqual(all_decks[0].name, first_deck_name)
+        self.assertEqual(all_decks[1].order, 0)
+        self.assertEqual(all_decks[1].name, second_deck_name)
+        self.assertEqual(all_decks[2].order, 1)
+        self.assertEqual(all_decks[2].name, third_deck_name)
+
+        self.client.get("/deck/%d/move/up/" % all_decks[0].id)
+
+        all_decks = Deck.objects.all()
+
+        # Move first deck up (nothing will change because it's already
+        # on top):
+        # 0 second deck
+        # 1 third deck
+        # 2 first deck
+        self.assertEqual(all_decks[0].order, 2)
+        self.assertEqual(all_decks[0].name, first_deck_name)
+        self.assertEqual(all_decks[1].order, 0)
+        self.assertEqual(all_decks[1].name, second_deck_name)
+        self.assertEqual(all_decks[2].order, 1)
+        self.assertEqual(all_decks[2].name, third_deck_name)
+
+    def test_move_deck_down(self):
+        shelf_name = "Some nice shelf"
+        first_deck_name = "First deck"
+        second_deck_name = "Second deck"
+        third_deck_name = "Third deck"
+
+        add_shelf(self.client, shelf_name)
+
+        # Add decks.
+        shelf = Shelf.objects.all()[0]
+        add_deck(self.client, shelf.id, first_deck_name)
+        add_deck(self.client, shelf.id, second_deck_name)
+        add_deck(self.client, shelf.id, third_deck_name)
+
+        all_decks = Deck.objects.all()
+
+        # Initial orders:
+        # 0 first deck
+        # 1 second deck
+        # 2 third deck
+        self.assertEqual(all_decks[0].order, 0)
+        self.assertEqual(all_decks[0].name, first_deck_name)
+        self.assertEqual(all_decks[1].order, 1)
+        self.assertEqual(all_decks[1].name, second_deck_name)
+        self.assertEqual(all_decks[2].order, 2)
+        self.assertEqual(all_decks[2].name, third_deck_name)
+
+        self.client.get("/deck/%d/move/down/" % all_decks[2].id)
+
+        all_decks = Deck.objects.all()
+
+        # Move third deck down:
+        # 0 first deck
+        # 1 third deck
+        # 2 second deck
+        self.assertEqual(all_decks[0].order, 0)
+        self.assertEqual(all_decks[0].name, first_deck_name)
+        self.assertEqual(all_decks[1].order, 2)
+        self.assertEqual(all_decks[1].name, second_deck_name)
+        self.assertEqual(all_decks[2].order, 1)
+        self.assertEqual(all_decks[2].name, third_deck_name)
+
+        self.client.get("/deck/%d/move/down/" % all_decks[2].id)
+
+        all_decks = Deck.objects.all()
+
+        # Move third deck down:
+        # 0 third deck
+        # 1 first deck
+        # 2 second deck
+        self.assertEqual(all_decks[0].order, 1)
+        self.assertEqual(all_decks[0].name, first_deck_name)
+        self.assertEqual(all_decks[1].order, 2)
+        self.assertEqual(all_decks[1].name, second_deck_name)
+        self.assertEqual(all_decks[2].order, 0)
+        self.assertEqual(all_decks[2].name, third_deck_name)
+
+        self.client.get("/deck/%d/move/down/" % all_decks[2].id)
+
+        all_decks = Deck.objects.all()
+
+        # Move third deck down (nothing will change because it's already
+        # on bottom):
+        # 0 third deck
+        # 1 first deck
+        # 2 second deck
+        self.assertEqual(all_decks[0].order, 1)
+        self.assertEqual(all_decks[0].name, first_deck_name)
+        self.assertEqual(all_decks[1].order, 2)
+        self.assertEqual(all_decks[1].name, second_deck_name)
+        self.assertEqual(all_decks[2].order, 0)
+        self.assertEqual(all_decks[2].name, third_deck_name)

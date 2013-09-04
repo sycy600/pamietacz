@@ -37,4 +37,4 @@ Unreleased
 * Add: Replaced pep8 and pyflakes with flake8
 * Add: User can export and import database as XML file
 * Add: User can upload images when adding or editing card
-* Fix: Question and answer cannot be empty
+* Add: User can change order of decks

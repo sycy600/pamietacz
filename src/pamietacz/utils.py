@@ -35,7 +35,7 @@ def dump_data_as_xml():
         shelf_xml = etree.Element("shelf")
         shelf_xml.attrib["name"] = shelf.name
         root.append(shelf_xml)
-        decks = Deck.objects.filter(shelf=shelf)
+        decks = Deck.objects.filter(shelf=shelf).order_by("order")
         for deck in decks:
             deck_xml = etree.Element("deck")
             deck_xml.attrib["name"] = deck.name
