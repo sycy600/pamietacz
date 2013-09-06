@@ -62,7 +62,7 @@ class Deck(models.Model):
 
     def save(self, *args, **kwargs):
         if self.pk is None:
-            if Deck.objects.count() == 0:
+            if Deck.objects.filter(shelf=self.shelf).count() == 0:
                 self.order = 0
             else:
                 decks_to_search = Deck.objects.filter(shelf=self.shelf)
