@@ -1,9 +1,9 @@
+from django.core.files.uploadedfile import SimpleUploadedFile
 from pamietacz.models import Shelf, Deck, Card
 from test_utils import (add_shelf,
                         add_deck,
                         add_card,
                         TransactionTestCaseWithAuthentication)
-from django.core.files.uploadedfile import SimpleUploadedFile
 
 
 class DumpLoadTests(TransactionTestCaseWithAuthentication):

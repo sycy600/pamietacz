@@ -24,7 +24,7 @@ urlpatterns = patterns(
      "pamietacz.views.upload_image"),
     (r"^card/(?P<card_id>\d+)/edit/$", "pamietacz.views.add_edit_card"),
     (r"^card/(?P<card_id>\d+)/delete/$", "pamietacz.views.delete_card"),
-    (r"^register/$", "pamietacz.views.register"),
+    (r"^register/$", "pamietacz.views.register_new_user"),
     (r"^login/$", "django.contrib.auth.views.login",
      {"template_name": "login.html",
       "authentication_form": AuthenticationForm,

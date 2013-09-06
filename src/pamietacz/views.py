@@ -9,7 +9,6 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.views.decorators.http import require_http_methods
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
-
 from forms import (ShelfForm,
                    DeckForm,
                    CardForm,
@@ -19,14 +18,15 @@ from forms import (ShelfForm,
 from models import Shelf, Deck, Card, TrainSession, TrainPool, TrainCard
 import datetime
 from collections import OrderedDict
-from utils import (backup,
-                   dump_data_as_xml,
-                   load_data_as_xml,
-                   XMLDataDumpException)
+from utils import backup
+from dump_load import (dump_data_as_xml,
+                       load_data_as_xml,
+                       XMLDataDumpException)
 from lxml import etree
 
 
 def shelf_list(request):
+    """Show all shelves. On this page shelves can be managed."""
     all_shelves = Shelf.objects.all()
     started_shelves_ids = None
     if request.user.is_authenticated():
@@ -71,6 +71,7 @@ def delete_shelf(request, shelf_id):
 
 @require_http_methods(["GET"])
 def show_shelf(request, shelf_id):
+    """Show what decks are available for specific shelf."""
     shelf = get_object_or_404(Shelf, pk=shelf_id)
     decks = Deck.objects.filter(shelf=shelf).order_by("order")
     return render(request,
@@ -120,6 +121,8 @@ def delete_deck(request, deck_id):
 @backup
 @require_http_methods(["GET"])
 def move_deck(request, deck_id, direction):
+    """Move decks up or down so order of decks within one shelf can be
+    changed."""
     deck = get_object_or_404(Deck, pk=deck_id)
     shelf_id = deck.shelf.id
     if direction in ("up", "down"):
@@ -131,6 +134,7 @@ def move_deck(request, deck_id, direction):
 
 @require_http_methods(["GET"])
 def show_deck(request, deck_id):
+    """Show what cards are available for specific deck."""
     deck = get_object_or_404(Deck, pk=deck_id)
     cards = Card.objects.filter(deck=deck).order_by("id")
     return render(request,
@@ -185,6 +189,7 @@ def add_edit_card(request, deck_id=None, card_id=None):
 @login_required
 @require_http_methods(["POST"])
 def upload_image(request):
+    """Upload image endpoint for AJAX requests."""
     uploaded_image = UploadedImage(request.POST, request.FILES)
     if uploaded_image.is_valid():
         filename = request.FILES["uploaded_image"].name
@@ -206,7 +211,7 @@ def delete_card(request, card_id):
 
 @backup
 @require_http_methods(["GET", "POST"])
-def register(request):
+def register_new_user(request):
     if request.method == "GET":
         register_form = UserCreationForm()
     elif request.method == "POST":
@@ -222,6 +227,7 @@ def register(request):
 @login_required
 @require_http_methods(["GET"])
 def user_shelves(request):
+    """Show what shelves user started to learn."""
     profile = request.user
     shelves = profile.shelves.all()
     items_to_train_dict = {}
@@ -231,7 +237,8 @@ def user_shelves(request):
             deck__in=shelf.deck_set.all())
         items_to_train_dict[shelf.id] = 0
         for train_pool in train_pools:
-            items_to_train_dict[shelf.id] += train_pool.items_to_train()
+            items_to_train_dict[shelf.id] +=\
+                train_pool.number_of_cards_to_repeat_now()
     return render(request,
                   "user_shelves.html",
                   {"all_shelves": shelves,
@@ -242,8 +249,12 @@ def user_shelves(request):
 @backup
 @require_http_methods(["GET"])
 def start_shelf(request, shelf_id):
+    """Start to learn new shelf."""
     shelf = get_object_or_404(Shelf, pk=shelf_id)
     profile = request.user
+    if profile.shelves.filter(pk=shelf_id).exists():
+        # User has already started to learn this shelf.
+        redirect(reverse("pamietacz.views.shelf_list"))
     profile.shelves.add(shelf)
     profile.save()
     return redirect(reverse("pamietacz.views.shelf_list"))
@@ -253,6 +264,8 @@ def start_shelf(request, shelf_id):
 @backup
 @require_http_methods(["GET"])
 def stop_shelf(request, shelf_id):
+    """Stop to learn shelf so that all training history will be
+    gone."""
     shelf = get_object_or_404(Shelf, pk=shelf_id)
     profile = request.user
     profile.shelves.remove(shelf)
@@ -272,6 +285,8 @@ def stop_shelf(request, shelf_id):
 @login_required
 @require_http_methods(["GET"])
 def user_show_shelf(request, shelf_id):
+    """Show what decks within started shelf are available to train
+    for specific user."""
     shelf = get_object_or_404(Shelf, pk=shelf_id)
     profile = request.user
     if not profile.started_shelf(shelf):
@@ -285,18 +300,23 @@ def user_show_shelf(request, shelf_id):
     decks_ids = [train_session.deck.id
                  for train_session in started_sessions]
 
+    # Retrieve train pools (card sets) for specific user.
     train_pools = TrainPool.objects.filter(userprofile=profile,
                                            deck__in=decks)
-    items_to_train_dict = {}
+
+    # Get the number of cards ready to repeat for specific training pool.
+    number_of_cards_to_repeat_now = {}
     for train_pool in train_pools:
-        items_to_train_dict[train_pool.deck.id] = train_pool.items_to_train()
+        number_of_cards_to_repeat_now[train_pool.deck.id] =\
+            train_pool.number_of_cards_to_repeat_now()
 
     return render(request,
                   "user_show_shelf.html",
                   {"shelf": shelf,
                    "decks": decks,
                    "started_train_sessions_decks_id": decks_ids,
-                   "items_to_train_dict": items_to_train_dict})
+                   "number_of_cards_to_repeat_now":
+                   number_of_cards_to_repeat_now})
 
 
 @login_required
@@ -376,6 +396,8 @@ def user_train_session(request, session_id):
 @login_required
 @require_http_methods(["GET"])
 def user_show_deck(request, deck_id):
+    """Show cards for given deck with the next time to reply for specific
+    user."""
     deck = get_object_or_404(Deck, pk=deck_id)
     profile = request.user
     if not profile.started_shelf(deck.shelf):
@@ -396,6 +418,8 @@ def user_show_deck(request, deck_id):
 
 @require_http_methods(["GET"])
 def dump_data(request):
+    """Save all shelf/deck/card data and return as XML file. User specific
+    is not dumped."""
     file_content = dump_data_as_xml()
     file_response = HttpResponse(file_content, content_type="application/xml")
     content_disposition = 'attachment; filename="dump_data.xml"'
@@ -407,6 +431,7 @@ def dump_data(request):
 @backup
 @require_http_methods(["GET", "POST"])
 def load_data(request):
+    """Load data (shelf/deck/card) from XML file to database."""
     if request.method == "GET":
         upload_form = DataDumpUploadFileForm()
     elif request.method == "POST":
