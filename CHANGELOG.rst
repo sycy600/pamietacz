@@ -6,6 +6,8 @@ Changelog
 Unreleased
 ==========
 
+* Fix: Deck model save order handling
+
 =====
 0.1.0
 =====
