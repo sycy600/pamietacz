@@ -12,8 +12,8 @@ Features
 * simple editor: Markdown support, upload images
 * sharing notes - import/export as XML file
 
-Basics
-======
+How to setup
+============
 
 Get ``buildout``::
 
