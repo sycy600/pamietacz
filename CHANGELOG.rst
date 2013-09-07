@@ -6,6 +6,10 @@ Changelog
 Unreleased
 ==========
 
+=====
+0.1.0
+=====
+
 * Add: Skeleton of Django app
 * Add: pep8, pyflakes and test scripts
 * Add: Static JS and CSS
