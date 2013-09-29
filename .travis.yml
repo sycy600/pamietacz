@@ -2,8 +2,12 @@ language: python
 python:
   - "2.7"
 install:
+  # Turn on virtual framebuffer so GUI programs like Firefox can be launched
+  - export DISPLAY=:99.0
+  - sh -e /etc/init.d/xvfb start
+
   - pip install --upgrade setuptools
   - python bootstrap.py
   - bin/buildout
 script:
-  - bin/check
+  - bin/long-check
