@@ -17,7 +17,7 @@ How to setup
 
 Get ``buildout``::
 
-    python2.7 bootstrap.py
+    python2.7 bootstrap.py -v 2.2.1
 
 Create project structure::
 
@@ -43,7 +43,7 @@ The pattern for test filename is ``*_tests.py``.
 Run only unit tests::
 
     bin/unit-tests
-    
+
 Run only functional tests::
 
     bin/functional-tests
@@ -51,7 +51,7 @@ Run only functional tests::
 Run unit tests, check flake8::
 
     bin/check
-    
+
 Run functional tests, unit tests, flake8::
 
     bin/long-check

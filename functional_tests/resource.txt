@@ -11,27 +11,40 @@ ${BROWSER}  firefox
 
 Register New User  [Arguments]  ${username}  ${password}
     Click Link  Register
-    Wait Until Page Contains Element  username
+    Wait Until Page Contains Element  password1
     Input Text  username  ${username}
     Input Text  password1  ${password}
     Input Text  password2  ${password}
     Click Button  Submit
-    
+
 Login User   [Arguments]  ${username}  ${password}
     Click Link  Login
-    Wait Until Page Contains Element  username
+    Wait Until Page Contains Element  password
     Input Text  username  ${username}
     Input Text  password  ${password}
     Click Button  Submit
-    
+
 Logout User
     Click Link  Logout
-    
+
 Open Browser Then Register Then Login  [Arguments]  ${username}  ${password}
+    Log to console  Open the browser
     Open Browser  ${SERVER}  ${BROWSER}
+    Log to console  Register a new user
     Register New User  ${username}  ${password}
+    # after registering, the browser is redirected to login page
+    # however login also goes to this page, we may end up
+    # with broken DOM representation error in selenium
+    # because we can end up in login page from two identities, so
+    # to prevent this we redirect to another page and the back to login page
+    Go To  ${SERVER}shelf/list/
+    Wait Until Page Contains  Shelves
+    Log to console  Login a new user
     Login User  ${username}  ${password}
-    
+    Log to console  Wait until user logged in
+    Wait Until Page Contains  Logged as
+    Log to console  Finished opening the browser
+
 Logout Then Close Browser
     Logout User
     Wait Until Page Contains  Login

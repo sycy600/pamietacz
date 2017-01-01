@@ -5,5 +5,11 @@ setup(
     version = "0.2.0",
     packages = find_packages('src'),
     package_dir = {'': 'src'},
-    install_requires = ['setuptools', 'markdown', 'pygments', 'lxml', 'Pillow', 'django==1.6.4'],
+    install_requires = [
+    'setuptools',
+    'markdown==2.3.1',
+    'pygments==1.6',
+    'lxml==3.2.3',
+    'Pillow==2.1.0'
+    ]
 )

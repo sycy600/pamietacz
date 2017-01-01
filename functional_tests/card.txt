@@ -13,6 +13,7 @@ ${PASSWORD}  some_password
 
 Add New Card
     Go To  ${SERVER}shelf/list/
+    Wait Until Page Contains  Add a new shelf
     Click Link  Add a new shelf
     Wait Until Page Contains Element  id_name
     Input Text  name  New shelf
@@ -35,5 +36,3 @@ Add New Card
     Go To  ${SERVER}deck/1/show/
     Page Should Contain  How are you?
     Page Should Contain  Thanks, I am fine
-    
-    

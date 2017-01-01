@@ -12,21 +12,25 @@ ${PASSWORD}  some_password
 *** Test Cases ***
 
 Create New User
-    Location Should Be  ${SERVER}login/?next=/
+    Go To  ${SERVER}shelf/list/
+    Wait Until Page Contains  Shelves
     Page Should Contain   Login
     Page Should Contain   Register
     Page Should Not Contain   Logout
     Login User  ${USERNAME}  ${PASSWORD}
+    Wait Until Page Contains  Please enter a correct username and password
     Page Should Contain  Please enter a correct username and password.
     Page Should Contain   Login
     Page Should Contain   Register
     Page Should Not Contain   Logout
     Register New User  ${USERNAME}  ${PASSWORD}
     Login User  ${USERNAME}  ${PASSWORD}
+    Wait Until Page Contains  Logged as
     Page Should Not Contain   Login
     Page Should Not Contain   Register
     Page Should Contain   Logout
     Logout User
+    Wait Until Page Does Not Contain  Logged as
     Page Should Contain   Login
     Page Should Contain   Register
     Page Should Not Contain   Logout

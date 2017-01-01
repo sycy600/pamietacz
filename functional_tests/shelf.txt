@@ -16,8 +16,10 @@ Add New Shelf
     Location Should Be  ${SERVER}shelf/list/
     Page Should Not Contain  New shelf2
     Click Link  Add a new shelf
+    Wait Until Page Contains  Add shelf
     Location Should Be  ${SERVER}shelf/add/
     Input Text  name  New shelf2
     Click Button  Submit
+    Wait Until Page Contains  New shelf2
     Page Should Contain  New shelf2
     Location Should Be  ${SERVER}shelf/list/

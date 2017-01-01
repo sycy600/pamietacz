@@ -1,17 +1,19 @@
 language: python
 python:
   - "2.7"
+addons:
+  firefox: latest
 install:
   # Turn on virtual framebuffer so GUI programs like Firefox can be launched
   - export DISPLAY=:99.0
   - sh -e /etc/init.d/xvfb start
 
   # Buildout needs new setuptools merged with Distribute
-  - pip install --upgrade setuptools
-  
+  - pip install setuptools==3.3
+
   # Get buildout
-  - python bootstrap.py
-  
+  - python bootstrap.py -v 2.2.1
+
   # Setup project
   - bin/buildout
 script:
