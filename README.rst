@@ -17,7 +17,7 @@ How to setup
 
 Get ``buildout``::
 
-    python2.7 bootstrap.py -v 2.2.1
+    python2.7 bootstrap.py -v 2.3.0
 
 Create project structure::
 
